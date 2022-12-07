@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <h1 style="color:white;font-size:30px;background-color:black"> Week8: GLSL</h1>
+<script>window.onerror = function(error, url, line) {parent.postMessage(["console", "❌ -- [ERROR] -- ❌ -- ⚠️ " + error], "*")};var cl = console.log;console.log = function () {var msg = [...arguments].join();parent.postMessage(["console", msg], "*");  }  </script><script crossorigin src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/109/three.min.js">
+</script>
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<style>
+		body {
+			margin: 0px;
+			background-color: #000000;
+			overflow: hidden;
+		}
+	</style>
+</head>
+<body>
+	<script id="vertexShader" type="x-shader/x-vertex">
+		uniform highp float time;
+
+		void main() {
+	        gl_Position = vec4(position,1.0) ;                
+		}
+
+</script>
+	<script id="fragmentShader" type="x-shader/x-fragment">
+		//============================================================
+		//PUT YOUR GLSL CODE HERE
+		//============================================================
+
+        precision mediump float;
+        
+        uniform vec2 resolution;
+        uniform vec2 mouse;
+        uniform highp float time;
+        #define M_PI 3.14159265358979323846
+        
+        float rectangle(vec2 pos, vec2 dim) {
+        
+ 			// normalizing the 2d coordinates
+        	vec2 normCoords = gl_FragCoord.xy/resolution;
+         	
+            // get aspect ratio to correct the width
+            float aspect = resolution.x/resolution.y;
+            
+            // scale the dimensions
+            dim*=0.1;
+            
+            if (length((normCoords.x-pos.x) * aspect)< dim.x && length(normCoords.y-pos.y) < dim.y) {
+    
+                return 1.0; // returns color of 1 (white)
+            
+            } else {
+                
+                return 0.; // returns color of 0 (black)
+            }
+     
+        }
+    
+        float square(vec2 pos, float size) {
+ 
+        	vec2 normCoords = gl_FragCoord.xy/resolution;
+        
+            float aspect = resolution.x/resolution.y;
+            size*=0.1;
+            if (length((normCoords.x-pos.x) * aspect)< size && length(normCoords.y-pos.y) < size) {
+    
+                return 1.0;
+            
+            } else {
+                
+                return 0.;
+            }
+        }
+    
+        float line(vec2 pos, float funct) {
+
+           return step(funct,pos.y)-step(funct,pos.y-0.01);
+        }
+        
+        float circle(vec2 pos, float size) {
+            
+            size = 1./size;
+            size*=10.;
+            float aspect = resolution.x/resolution.y;
+            
+            vec2 normCoord = vec2(gl_FragCoord.x/(resolution.x) * aspect,gl_FragCoord.y/resolution.y);
+            
+            float colour = distance(normCoord,pos);
+            return smoothstep(colour * size, colour * size+0.02,1.);
+        }
+        
+        void main(){            
+        	//vec2 pos = gl_FragCoord.xy/resolution;
+
+
+            
+           //train
+            float squ = square(vec2(0.44,0.54),1.4);
+         
+            float rect1 = rectangle(vec2(0.19,0.6),vec2(4.45,2));
+            float rect2 = rectangle(vec2(0.47,0.71),vec2(0.2,0.3));
+            float rect3 = rectangle(vec2(0.45,0.6),vec2(1,0.5));
+            
+            float circle3 = circle(vec2(0.13,0.3),0.5);           
+            float circle4 = circle(vec2(0.7,0.3),0.5);
+            float circle6 = circle(vec2(1,0.3),0.5); 
+            
+            float circle1 = circle(vec2(0.13,0.3),1.);           
+            float circle2 = circle(vec2(0.7,0.3),1.);
+            float circle5 = circle(vec2(1,0.3),1.);
+               
+            vec3 squareOne = vec3(0.3,0.6,0.3) * squ;            
+            vec3 rectOne = vec3(1,0,0) * rect2;            
+            vec3 rectTwo = vec3(1.0,0.4,0.5) * rect1;
+            vec3 rectTh = vec3(0,0,0.5) * rect3;
+            
+            vec3 CircleTh = vec3(1.0,0.4,0.5) * circle3;           
+            vec3 CircleF = vec3(1.0,0.4,0.5) * circle4;
+            vec3 CircleS = vec3(1.0,0.4,0.5) * circle6;
+            
+            vec3 Circleone = vec3(1,0.6,0.5) * circle1;            
+            vec3 Circletwo = vec3(1,0.6,0.5) * circle2;
+            vec3 CircleFr = vec3(1,0.6,0.5) * circle5;
+        
+         //smoke
+             vec2 normres = (gl_FragCoord.xy / resolution.xy);
+    
+             vec2 pos = vec2(0.47,0.77)-normres;
+    	     float size1 = abs(sin(time)) / 50.;
+    	     float colour1 = 0.;
+             if (length(pos.x) < size1 && length(pos.y) < size1) colour1 = 1.;
+        
+        //background
+        float angle = M_PI * mouse.x;
+    	mat2 rotation = mat2(cos(angle), sin(angle),
+                             -sin(angle), cos(angle));
+        mat2 scale = mat2(1.,0.,1.,2.);
+        vec2 translate = vec2(resolution.x/2.,resolution.y/7.);
+    	vec2 pos1 = mod(rotation * (gl_FragCoord.xy - translate), vec2(9.0)) - vec2(15.0);
+    	    	
+        float dist_squared = dot(pos1, pos1);
+            
+        	
+            gl_FragColor = vec4(
+            vec3(smoothstep(100., 700., dist_squared))+rectTh + squareOne + rectTwo + rectOne + vec3(colour1) + CircleTh + CircleF + Circleone + Circletwo+ CircleFr + CircleS ,1.0
+            );
+        }
+        
+		//============================================================
+		//END OF GLSL CODE
+		//============================================================
+
+</script>
+	<script>
+		//change the resolution here. 1 is highest
+		var pixel_resolution = 2;
+		var stats;
+		var camera, scene, renderer;
+		var uniforms;
+		init();
+		animate();
+		function init() {
+
+			camera = new THREE.Camera();
+			camera.position.z = 1;
+			scene = new THREE.Scene();
+			var geometry = new THREE.PlaneBufferGeometry(2,2);
+			uniforms = { time: { type: 'f', value: 1.0 }, resolution: { type: 'v2', value: new THREE.Vector2() }, mouse: {type: "v2", value: new THREE.Vector2()}};
+			var material = new THREE.ShaderMaterial({ uniforms: uniforms, vertexShader: document.getElementById('vertexShader').textContent, fragmentShader: document.getElementById('fragmentShader').textContent });
+			var mesh = new THREE.Mesh(geometry, material);
+			scene.add(mesh);
+			renderer = new THREE.WebGLRenderer();
+			//Hack here to change resolution 
+			renderer.setPixelRatio(window.devicePixelRatio / pixel_resolution);
+			document.body.appendChild(renderer.domElement);
+			onWindowResize();
+			window.addEventListener('resize', onWindowResize, false);
+	        window.addEventListener('mousemove', onMouseMove, false);
+
+		}
+		function onWindowResize(event) {
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			uniforms.resolution.value.x = renderer.domElement.width;
+			uniforms.resolution.value.y = renderer.domElement.height;
+
+		}
+		function animate() {
+			requestAnimationFrame(animate);
+			render();
+		}
+		function onMouseMove( event ) {
+        	uniforms.mouse.value.x = ( event.clientX / window.innerWidth );
+ 	        uniforms.mouse.value.y = ( 1-(event.clientY) / window.innerHeight
+ 	        );
+        }
+		function render() {
+			uniforms.time.value += 0.01;
+			renderer.render(scene, camera);
+		}
+
+</script>
+</body>
+</html>
